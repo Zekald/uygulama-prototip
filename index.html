@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oyunio - Basamak Değeri Modülü (Prototip)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Fredoka', cursive, sans-serif; }
+    .pulse-once { animation: pulse 0.5s ease-in-out; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+  </style>
+</head>
+<body class="bg-amber-50 min-h-screen text-slate-800 flex flex-col justify-between p-4 md:p-8">
+
+  <!-- Üst Bar: Logo ve Mod Seçici -->
+  <header class="max-w-4xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-amber-200">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold shadow-md shadow-indigo-200">
+        O
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-wide text-indigo-950 flex items-center gap-2">
+          Oyunio <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Erken Matematik</span>
+        </h1>
+        <p class="text-xs text-slate-500">Bedenlenmiş & Dijital Basamak Değeri Laboratuvarı</p>
+      </div>
+    </div>
+
+    <!-- Mod Değiştirme Butonları -->
+    <div class="flex bg-amber-100 p-1 rounded-xl text-xs sm:text-sm font-semibold text-slate-700">
+      <button id="btn-mode-digital" onclick="setMode('digital')" class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-indigo-700 transition">
+        📱 Dokunmatik Mod
+      </button>
+      <button id="btn-mode-tangible" onclick="setMode('tangible')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-indigo-700 transition">
+        🧩 Somut Kit Modu
+      </button>
+      <button id="btn-mode-print" onclick="setMode('print')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-indigo-700 transition">
+        🖨️ Yazdır-Oyna (A4)
+      </button>
+    </div>
+  </header>
+
+  <!-- Ana Görev Alanı -->
+  <main class="max-w-4xl mx-auto w-full my-6 flex-1 flex flex-col items-center">
+    
+    <!-- Görev Kartı -->
+    <div class="bg-white rounded-3xl p-6 shadow-xl shadow-amber-100/50 border-2 border-indigo-100 w-full text-center relative overflow-hidden">
+      <div class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-1">GÖREV HEDEFİ</div>
+      <div class="text-4xl md:text-5xl font-black text-indigo-900 tracking-tight flex items-center justify-center gap-3">
+        Hedef Sayı: <span id="target-number" class="text-amber-500 underline decoration-indigo-200">34</span>
+      </div>
+      <p id="instruction-text" class="text-sm md:text-base text-slate-600 mt-2">
+        Aşağıdaki onluk ve birlik bloklarını panoya yerleştirerek hedef sayıyı oluştur!
+      </p>
+    </div>
+
+    <!-- 1. MOD: DOKUNMATİK DİJİTAL SİMÜLASYON -->
+    <div id="section-digital" class="w-full mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Manipülatif Araç Çantası (Sol) -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center justify-between">
+            <span>Blok Havuzu</span>
+            <span class="text-xs text-slate-400">Tıkla ve Ekle</span>
+          </h3>
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Onluk Ekle Butonu -->
+            <button onclick="addBlock('tens')" class="group p-4 rounded-xl border-2 border-dashed border-indigo-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition flex flex-col items-center gap-2">
+              <div class="w-8 h-24 bg-indigo-500 rounded-md shadow-inner flex flex-col justify-between py-1 items-center">
+                <div class="w-6 h-1.5 bg-indigo-300 rounded-sm"></div>
+                <div class="w-6 h-1.5 bg-indigo-300 rounded-sm"></div>
+                <div class="w-6 h-1.5 bg-indigo-300 rounded-sm"></div>
+                <div class="w-6 h-1.5 bg-indigo-300 rounded-sm"></div>
+                <div class="w-6 h-1.5 bg-indigo-300 rounded-sm"></div>
+              </div>
+              <span class="text-xs font-bold text-indigo-900">+ 1 Onluk Ekle</span>
+            </button>
+
+            <!-- Birlik Ekle Butonu -->
+            <button onclick="addBlock('ones')" class="group p-4 rounded-xl border-2 border-dashed border-amber-200 hover:border-amber-500 hover:bg-amber-50/50 transition flex flex-col items-center justify-center gap-3">
+              <div class="w-6 h-6 bg-amber-400 rounded-md shadow-md border border-amber-500"></div>
+              <span class="text-xs font-bold text-amber-900">+ 1 Birlik Ekle</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+          <span>Temizle / Sıfırla:</span>
+          <button onclick="resetBoard()" class="text-rose-500 hover:underline font-semibold">Panoyu Boşalt</button>
+        </div>
+      </div>
+
+      <!-- Basamak Panosu (Sağ) -->
+      <div class="bg-indigo-950 text-white rounded-2xl p-5 shadow-inner flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center pb-3 border-b border-indigo-900">
+            <h3 class="text-sm font-bold tracking-wide text-indigo-200">Basamak Panosu</h3>
+            <div class="text-xs font-mono bg-indigo-900/80 px-2 py-1 rounded text-amber-300">
+              Mevcut Toplam: <span id="current-sum" class="font-bold text-sm">0</span>
+            </div>
+          </div>
+
+          <!-- Onluklar ve Birlikler Kolonları -->
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <!-- Onluk Kolonu -->
+            <div class="bg-indigo-900/40 rounded-xl p-3 border border-indigo-800/60 min-h-[160px] flex flex-col">
+              <span class="text-xs font-bold text-indigo-300 mb-2 block text-center">ONLUKLAR (<span id="tens-count">0</span>)</span>
+              <div id="tens-container" class="flex flex-wrap gap-1.5 items-end justify-center flex-1"></div>
+            </div>
+
+            <!-- Birlik Kolonu -->
+            <div class="bg-indigo-900/40 rounded-xl p-3 border border-indigo-800/60 min-h-[160px] flex flex-col">
+              <span class="text-xs font-bold text-amber-300 mb-2 block text-center">BİRLİKLER (<span id="ones-count">0</span>)</span>
+              <div id="ones-container" class="flex flex-wrap gap-1.5 items-center justify-center flex-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doğrulama Butonu -->
+        <button onclick="verifyAnswer()" class="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] transition font-bold py-3 rounded-xl text-white shadow-lg shadow-emerald-900/30 text-sm">
+          Çözümü Doğrula ✨
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 2. MOD: SOMUT KİT ETKİLEŞİMİ (Masaüstü Görev Panosu) -->
+    <div id="section-tangible" class="w-full mt-6 hidden bg-white rounded-2xl p-6 border border-slate-200 shadow-sm text-center">
+      <div class="max-w-md mx-auto">
+        <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-3xl mb-3">
+          🧩
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">Fiziksel Kit ile Çöz</h3>
+        <p class="text-xs text-slate-500 mt-1 mb-4">
+          Masandaki Oyunio ahşap/plastik kitinden onluk çubukları ve birlik pulları alarak hedef sayıyı panonda oluştur.
+        </p>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left space-y-3 mb-6">
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-slate-600">Kullandığın Onluk Sayısı:</span>
+            <input type="number" id="tangible-tens" min="0" max="9" class="w-16 px-2 py-1 border rounded text-center font-bold text-indigo-700" placeholder="0">
+          </div>
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-slate-600">Kullandığın Birlik Sayısı:</span>
+            <input type="number" id="tangible-ones" min="0" max="9" class="w-16 px-2 py-1 border rounded text-center font-bold text-amber-600" placeholder="0">
+          </div>
+        </div>
+
+        <button onclick="verifyTangible()" class="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-3 rounded-xl text-white shadow-md text-sm transition">
+          Fiziksel Çözümü Gönder & Kilidi Aç 🚀
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. MOD: YAZDIR-OYNA A4 ŞABLONU (Frugal Scalability) -->
+    <div id="section-print" class="w-full mt-6 hidden bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+        <div>
+          <h3 class="text-lg font-bold text-slate-800">A4 Yazdır-Oyna Şablonu (Frugal Mod)</h3>
+          <p class="text-xs text-slate-500">Yazıcıdan çıkarıp makasla keserek anında sınıfta uygulayabileceğiniz ücretsiz şablon.</p>
+        </div>
+        <button onclick="window.print()" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition flex items-center gap-2">
+          🖨️ Sayfayı Yazdır
+        </button>
+      </div>
+
+      <!-- A4 Önizleme Kartı -->
+      <div class="border-2 border-dashed border-slate-300 p-6 rounded-xl bg-slate-50 text-center">
+        <p class="text-xs font-semibold text-slate-400 mb-2">A4 ŞABLON ÖNİZLEMESİ</p>
+        <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+          <div class="border border-indigo-300 p-3 rounded bg-white">
+            <span class="text-xs font-bold text-indigo-700">10'luk Şeritler</span>
+            <div class="mt-2 space-y-1">
+              <div class="h-3 bg-indigo-400 rounded-sm"></div>
+              <div class="h-3 bg-indigo-400 rounded-sm"></div>
+              <div class="h-3 bg-indigo-400 rounded-sm"></div>
+            </div>
+          </div>
+          <div class="border border-amber-300 p-3 rounded bg-white">
+            <span class="text-xs font-bold text-amber-700">1'lik Kareler</span>
+            <div class="mt-2 flex flex-wrap gap-1 justify-center">
+              <div class="w-3 h-3 bg-amber-400 rounded-sm"></div>
+              <div class="w-3 h-3 bg-amber-400 rounded-sm"></div>
+              <div class="w-3 h-3 bg-amber-400 rounded-sm"></div>
+              <div class="w-3 h-3 bg-amber-400 rounded-sm"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Geri Bildirim ve İskeleleme (Scaffolding) Bildirimi -->
+    <div id="feedback-card" class="mt-6 w-full max-w-md p-4 rounded-2xl text-center text-sm font-semibold transition-all duration-300 hidden"></div>
+
+  </main>
+
+  <!-- Alt Bilgi: Dr. Manches & DBR Proje Notu -->
+  <footer class="max-w-4xl mx-auto w-full pt-4 border-t border-amber-200/80 text-center text-xs text-slate-500">
+    <p>Oyunio Projesi • Tasarım Tabanlı Araştırma (DBR) Çerçevesinde Sınıf İçi Kullanım İçin Modüler Prototip</p>
+  </footer>
+
+  <script>
+    // --- SES MOTORU (Web Audio API - Harici MP3 gerektirmez) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playTone(freq, type = 'sine', duration = 0.15) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playSuccessSound() {
+      playTone(523.25, 'triangle', 0.1); // C5
+      setTimeout(() => playTone(659.25, 'triangle', 0.1), 100); // E5
+      setTimeout(() => playTone(783.99, 'triangle', 0.25), 200); // G5
+    }
+
+    function playErrorSound() {
+      playTone(220, 'sawtooth', 0.2);
+      setTimeout(() => playTone(196, 'sawtooth', 0.25), 150);
+    }
+
+    // --- UYGULAMA DURUMU (State) ---
+    let target = 34;
+    let tens = 0;
+    let ones = 0;
+    let attempts = 0;
+
+    // Hedef Sayıyı Dinamik Üretme
+    function generateTarget() {
+      target = Math.floor(Math.random() * 80) + 11; // 11 - 90 arası
+      document.getElementById('target-number').innerText = target;
+      resetBoard();
+    }
+
+    // Blok Ekleme Fonksiyonu
+    function addBlock(type) {
+      if (type === 'tens') {
+        if (tens >= 9) return;
+        tens++;
+        playTone(440, 'sine', 0.08);
+      } else {
+        if (ones >= 9) return;
+        ones++;
+        playTone(660, 'sine', 0.08);
+      }
+      renderBoard();
+    }
+
+    // Panoyu Çizdirme
+    function renderBoard() {
+      document.getElementById('tens-count').innerText = tens;
+      document.getElementById('ones-count').innerText = ones;
+      const sum = (tens * 10) + ones;
+      document.getElementById('current-sum').innerText = sum;
+
+      // Onlukları Render Et
+      const tensBox = document.getElementById('tens-container');
+      tensBox.innerHTML = '';
+      for (let i = 0; i < tens; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'w-4 h-16 bg-indigo-400 rounded-sm shadow border border-indigo-300';
+        tensBox.appendChild(bar);
+      }
+
+      // Birlikleri Render Et
+      const onesBox = document.getElementById('ones-container');
+      onesBox.innerHTML = '';
+      for (let i = 0; i < ones; i++) {
+        const cube = document.createElement('div');
+        cube.className = 'w-4 h-4 bg-amber-400 rounded-sm shadow border border-amber-300';
+        onesBox.appendChild(cube);
+      }
+    }
+
+    function resetBoard() {
+      tens = 0;
+      ones = 0;
+      renderBoard();
+      hideFeedback();
+    }
+
+    // Kademeli İskeleleme (Scaffolding) ile Doğrulama
+    function verifyAnswer() {
+      const sum = (tens * 10) + ones;
+      const feedback = document.getElementById('feedback-card');
+      attempts++;
+
+      if (sum === target) {
+        playSuccessSound();
+        feedback.className = "mt-6 w-full max-w-md p-4 rounded-2xl text-center text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 block pulse-once";
+        feedback.innerHTML = ` Harika! ${target} sayısını tam olarak oluşturdun! 3 saniye içinde yeni görev geliyor...`;
+        setTimeout(generateTarget, 3000);
+      } else {
+        playErrorSound();
+        feedback.className = "mt-6 w-full max-w-md p-4 rounded-2xl text-center text-sm font-semibold bg-amber-100 text-amber-900 border border-amber-300 block";
+        
+        // Kademeli ipucu mantığı
+        if (attempts === 1) {
+          feedback.innerHTML = `Tekrar dene! Şu anki toplamın: <b>${sum}</b>. Hedef sayıya ulaşmak için bloklarını yeniden sayabilirsin.`;
+        } else {
+          const targetTens = Math.floor(target / 10);
+          const targetOnes = target % 10;
+          feedback.innerHTML = ` İpucu: Bu sayıda tam <b>${targetTens} Onluk</b> ve <b>${targetOnes} Birlik</b> olması gerekiyor.`;
+        }
+      }
+    }
+
+    // Somut Kit Doğrulaması
+    function verifyTangible() {
+      const inputTens = parseInt(document.getElementById('tangible-tens').value) || 0;
+      const inputOnes = parseInt(document.getElementById('tangible-ones').value) || 0;
+      const sum = (inputTens * 10) + inputOnes;
+      const feedback = document.getElementById('feedback-card');
+
+      if (sum === target) {
+        playSuccessSound();
+        feedback.className = "mt-6 w-full max-w-md p-4 rounded-2xl text-center text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 block";
+        feedback.innerHTML = ` Tebrikler! Masandaki somut çözüm doğru. Dijital kilit açıldı!`;
+        setTimeout(generateTarget, 3000);
+      } else {
+        playErrorSound();
+        feedback.className = "mt-6 w-full max-w-md p-4 rounded-2xl text-center text-sm font-semibold bg-amber-100 text-amber-900 border border-amber-300 block";
+        feedback.innerHTML = ` Masadaki blokları tekrar say. Girdiğin blokların toplamı: ${sum}.`;
+      }
+    }
+
+    function hideFeedback() {
+      document.getElementById('feedback-card').className = 'hidden';
+    }
+
+    // Mod Değiştirme
+    function setMode(mode) {
+      document.getElementById('section-digital').classList.add('hidden');
+      document.getElementById('section-tangible').classList.add('hidden');
+      document.getElementById('section-print').classList.add('hidden');
+
+      document.getElementById('btn-mode-digital').className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-indigo-700 transition";
+      document.getElementById('btn-mode-tangible').className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-indigo-700 transition";
+      document.getElementById('btn-mode-print').className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-indigo-700 transition";
+
+      if (mode === 'digital') {
+        document.getElementById('section-digital').classList.remove('hidden');
+        document.getElementById('btn-mode-digital').className = "px-3 py-1.5 rounded-lg bg-white shadow-sm text-indigo-700 transition";
+      } else if (mode === 'tangible') {
+        document.getElementById('section-tangible').classList.remove('hidden');
+        document.getElementById('btn-mode-tangible').className = "px-3 py-1.5 rounded-lg bg-white shadow-sm text-indigo-700 transition";
+      } else if (mode === 'print') {
+        document.getElementById('section-print').classList.remove('hidden');
+        document.getElementById('btn-mode-print').className = "px-3 py-1.5 rounded-lg bg-white shadow-sm text-indigo-700 transition";
+      }
+      hideFeedback();
+    }
+  </script>
+</body>
+</html>
